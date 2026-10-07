@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work Styles Sorter</title>
+<meta name="description" content="A short activity to help you notice what kinds of work you might enjoy, and what to explore next.">
+<style>
+:root{--forest:#013220;--gold:#C6A15B;--warm:#7B7B7B;--ivory:#F8F5E9;--char:#333333;--sage:#A3B18A;--coral:#D97A6A;--sky:#89B6A5;--sage-tint:#E4EADA;--coral-tint:#F7E0DB;--sky-tint:#DCEBE5;--white:#FFFFFF}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{font-size:100%}
+body{margin:0;background:var(--ivory);color:var(--char);font-family:Verdana,"DejaVu Sans",sans-serif;font-size:1.125rem;line-height:1.6}
+.skip{position:absolute;left:-999px;top:0;background:var(--white);color:var(--forest);padding:.6rem 1rem;z-index:10;font-weight:bold}
+.skip:focus{left:12px;top:8px}
+header.band{background:var(--forest);color:var(--ivory);padding:1.5rem 1rem 1.75rem;border-bottom:5px solid var(--gold)}
+.wrap{max-width:52rem;margin:0 auto}
+.kicker{color:var(--gold);font-weight:bold;font-size:1rem;letter-spacing:.04em;margin:0 0 .4rem}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 .5rem}
+header p{margin:0;font-size:1.125rem}
+main{max-width:52rem;margin:0 auto;padding:1.5rem 1rem 3rem}
+h2{color:var(--forest);font-size:1.5rem;line-height:1.3;margin:0 0 .75rem}
+h3{color:var(--forest);font-size:1.25rem;line-height:1.3;margin:1.25rem 0 .5rem}
+h2:focus{outline:none}
+p{margin:0 0 1rem}
+.card{background:var(--white);border:2px solid var(--sage);border-radius:10px;padding:1.25rem;margin:0 0 1.25rem}
+.note{background:var(--sky-tint);border-left:6px solid var(--forest);padding:.75rem 1rem;border-radius:0 8px 8px 0;margin:0 0 1.25rem}
+.warn{background:var(--coral-tint);border-left:6px solid var(--coral);padding:.75rem 1rem;border-radius:0 8px 8px 0;margin:0 0 1rem;color:#5a1f14}
+fieldset{border:2px solid var(--warm);border-radius:8px;margin:0 0 1rem;padding:.75rem 1rem 1rem;background:var(--white)}
+legend{font-weight:bold;color:var(--forest);padding:0 .4rem;font-size:1.125rem}
+.opts{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+.opt{display:flex;align-items:center;gap:.5rem;border:2px solid var(--warm);border-radius:8px;padding:.5rem .75rem;min-height:48px;background:var(--white);cursor:pointer;font-size:1rem}
+.opt input{width:1.25rem;height:1.25rem;margin:0;accent-color:var(--forest)}
+.opt:has(input:checked){background:var(--sage-tint);border-color:var(--forest);font-weight:bold}
+label.lbl{display:block;font-weight:bold;color:var(--forest);margin:0 0 .35rem}
+.hint{font-size:1rem;margin:0 0 .5rem;color:#4a4a4a}
+input[type=text],input[type=date],textarea,select{width:100%;font:inherit;font-size:1rem;color:var(--char);background:var(--white);border:2px solid var(--warm);border-radius:8px;padding:.6rem .7rem;min-height:48px}
+textarea{min-height:6.5rem;resize:vertical}
+button{font:inherit;font-size:1rem;cursor:pointer;min-height:48px;border-radius:8px;padding:.6rem 1.25rem;font-weight:bold}
+.btn{background:var(--forest);color:var(--ivory);border:2px solid var(--forest)}
+.btn:hover{background:#024a2f}
+.btn2{background:var(--white);color:var(--forest);border:2px solid var(--forest)}
+.btn2:hover{background:var(--sage-tint)}
+.row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1rem}
+:focus-visible{outline:3px solid var(--forest);outline-offset:3px}
+.btn:focus-visible{outline-color:var(--forest);box-shadow:0 0 0 3px var(--ivory),0 0 0 6px var(--forest)}
+.progress{font-size:1rem;font-weight:bold;color:var(--forest);margin:0 0 .5rem}
+.bar{height:12px;background:var(--sage-tint);border:2px solid var(--sage);border-radius:8px;overflow:hidden;margin:0 0 1.25rem}
+.bar span{display:block;height:100%;background:var(--forest)}
+.err{margin:0 0 1rem}
+.err:empty{display:none}
+.badge{display:inline-block;background:var(--forest);color:var(--ivory);border-radius:6px;padding:.1rem .6rem;font-size:1rem;font-weight:bold;margin-left:.5rem}
+.badge.alt{background:var(--sage-tint);color:var(--forest);border:2px solid var(--forest)}
+ul.plain{margin:0 0 1rem;padding-left:1.4rem}
+ul.plain li{margin:.25rem 0}
+.score{font-weight:bold}
+.fallback{width:100%;min-height:10rem;font-family:Verdana,"DejaVu Sans",sans-serif}
+footer{max-width:52rem;margin:0 auto;padding:1rem 1rem 2.5rem;border-top:2px solid var(--sage);font-size:1rem}
+footer p{margin:0 0 .5rem}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:1rem}
+th,td{border:2px solid var(--warm);padding:.5rem .6rem;text-align:left;vertical-align:top;background:var(--white)}
+th{background:var(--forest);color:var(--ivory)}
+.printonly{display:none}
+@media (max-width:520px){h1{font-size:1.6rem}.opts{flex-direction:column}.opt{width:100%}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media (forced-colors:active){.opt:has(input:checked){outline:3px solid Highlight}}
+@media print{
+  body{background:#fff;color:#000;font-size:12pt}
+  header.band{background:#fff;color:#000;border-bottom:2px solid #000;padding:0 0 .5rem}
+  .kicker{color:#000}
+  .noprint,.skip,.row,.progress,.bar{display:none!important}
+  .card{border:1px solid #000;break-inside:avoid}
+  th{background:#fff;color:#000}
+  .printonly{display:block}
+  a{color:#000}
+}
+
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to main content</a>
+<header class="band">
+  <div class="wrap">
+    <h1>Work Styles Sorter</h1>
+    <p>A short activity to help you notice what kinds of work you might enjoy, and what to explore next.</p>
+  </div>
+</header>
+<main id="main" tabindex="-1">
+  <noscript><div class="warn">This activity needs JavaScript. Please turn it on, or ask your coach for the Word version of this activity.</div></noscript>
+
+  <section id="intro" aria-labelledby="introH">
+    <h2 id="introH" tabindex="-1">How this works</h2>
+    <div class="card">
+      <p>You will read 18 short statements about work activities. For each one, choose how you feel. It takes about 5 minutes.</p>
+      <p>At the end, you will see which kinds of work match your answers most, along with examples of jobs to explore.</p>
+    </div>
+    <div class="note">
+      <p><strong>This is a starting point, not a test.</strong> There are no right or wrong answers, and your results do not decide your future. Nothing you enter is saved or sent anywhere. You can copy or print your results at the end.</p>
+    </div>
+    <div class="row"><button type="button" class="btn" id="startBtn">Start the activity</button></div>
+  </section>
+
+  <section id="quiz" hidden aria-labelledby="stepH">
+    <p class="progress" id="progressText"></p>
+    <div class="bar" aria-hidden="true"><span id="progressBar" style="width:0"></span></div>
+    <h2 id="stepH" tabindex="-1"></h2>
+    <p class="hint">Think about the activity itself, not whether you have the skills yet. Pick the answer that fits you best.</p>
+    <div id="err" class="err" role="alert"></div>
+    <form id="quizForm" novalidate></form>
+    <div class="row">
+      <button type="button" class="btn2" id="backBtn">Back</button>
+      <button type="button" class="btn" id="nextBtn">Next</button>
+    </div>
+  </section>
+
+  <section id="results" hidden aria-labelledby="resH">
+    <h2 id="resH" tabindex="-1">Your results</h2>
+    <p id="resIntro"></p>
+    <div id="resList"></div>
+    <h3>Think it over</h3>
+    <div class="noprint">
+      <div class="card">
+        <label class="lbl" for="r1">Which results fit you, and which surprised you?</label>
+        <textarea id="r1"></textarea>
+      </div>
+      <div class="card">
+        <label class="lbl" for="r2">Which jobs would you like to learn more about?</label>
+        <textarea id="r2"></textarea>
+      </div>
+      <div class="card">
+        <label class="lbl" for="r3">What is one thing you will do this month to learn more?</label>
+        <textarea id="r3"></textarea>
+      </div>
+    </div>
+    <div class="card printonly" id="printReflect"></div>
+    <h3>Where to look next</h3>
+    <ul class="plain" id="nextLinks"></ul>
+    <div class="row">
+      <button type="button" class="btn" id="copyBtn">Copy my results</button>
+      <button type="button" class="btn2" id="printBtn">Print my results</button>
+      <button type="button" class="btn2" id="redoBtn">Start over</button>
+    </div>
+    <p class="hint" style="margin-top:1rem">To print from your keyboard, press Ctrl+P (Windows) or Cmd+P (Mac).</p>
+    <p id="copyMsg" role="status" class="hint"></p>
+    <div id="fallbackBox" hidden>
+      <label class="lbl" for="fallbackTa">Your browser did not allow copying. Select the text below and copy it yourself.</label>
+      <textarea id="fallbackTa" class="fallback" readonly></textarea>
+    </div>
+  </section>
+</main>
+<footer>
+  <p>Developed by Educational Management Resources Group (EMRG). The job examples are general ideas, not job offers or promises about pay or openings.</p>
+</footer>
+
+<script>
+(function(){
+"use strict";
+// Set this to the web address of the California Occupation Explorer when it is published. Leave empty to show plain instructions instead of a link.
+var OCCUPATION_EXPLORER_URL = "";
+var ONET_PROFILER_URL = "https://onetinterestprofiler.org/";
+
+var STYLES = {
+  hands:{name:"Hands-on",desc:"You like working with tools, machines, vehicles, or materials, often in a shop, on a job site, or outdoors.",jobs:["Automotive technician","Electrician","Welder","Heating and air conditioning technician","Construction worker"]},
+  analyze:{name:"Analyzing",desc:"You like figuring things out, testing ideas, working with numbers or data, and finding the cause of a problem.",jobs:["Laboratory technician","Computer support specialist","Quality inspector","Data analyst"]},
+  create:{name:"Creating",desc:"You like making, designing, or styling things and coming up with new ideas.",jobs:["Graphic designer","Cook or chef","Cosmetologist","Photographer","Interior designer"]},
+  help:{name:"Helping",desc:"You like caring for, teaching, or supporting other people.",jobs:["Nursing assistant","Medical assistant","Early childhood teacher","Social services assistant","Teacher aide"]},
+  lead:{name:"Leading and selling",desc:"You like taking charge, persuading people, selling, or building something of your own.",jobs:["Retail or restaurant supervisor","Sales representative","Small business owner","Project coordinator"]},
+  organize:{name:"Organizing",desc:"You like keeping things accurate and in order, following clear steps, and handling records, schedules, or money.",jobs:["Office administrator","Bookkeeper","Medical billing and coding specialist","Shipping and inventory clerk","Bank teller"]}
+};
+var ITEMS = [
+ ["hands","Fix or build things with tools"],["analyze","Solve problems using numbers or data"],["create","Design, draw, or decorate things"],["help","Care for people who are sick, hurt, or need support"],["lead","Persuade people or sell an idea or product"],["organize","Keep records, files, or schedules in order"],
+ ["hands","Work outdoors or in a shop instead of an office"],["analyze","Find out how things work by testing or researching"],["create","Come up with new ideas or new ways to do things"],["help","Teach or show someone how to do something"],["lead","Lead a team or take charge of a project"],["organize","Follow clear steps and procedures"],
+ ["hands","Figure out why a machine or vehicle is not working"],["analyze","Check details carefully to find mistakes"],["create","Cook, style, or make things that people enjoy"],["help","Listen to someone who is having a hard time"],["lead","Start or run your own business"],["organize","Handle money, orders, or paperwork accurately"]
+];
+var CHOICES = [["2","I would enjoy this"],["1","I am not sure"],["0","I would rather not"]];
+var PAGE = 6, PAGES = ITEMS.length / PAGE;
+var ans = {}, page = 0, lastScores = null;
+var $ = function(id){return document.getElementById(id);};
+function el(tag, attrs, kids){
+  var e = document.createElement(tag);
+  Object.keys(attrs||{}).forEach(function(k){ if(k==="text") e.textContent=attrs[k]; else e.setAttribute(k, attrs[k]); });
+  (kids||[]).forEach(function(c){ e.appendChild(c); });
+  return e;
+}
+function show(id){ ["intro","quiz","results"].forEach(function(s){ $(s).hidden = (s!==id); }); }
+function focusHead(id){ var h=$(id); if(h){ h.focus(); window.scrollTo(0,0);} }
+
+function renderPage(){
+  var f = $("quizForm"); f.innerHTML = ""; $("err").textContent = "";
+  $("stepH").textContent = "Step " + (page+1) + " of " + PAGES + ": How do you feel about these activities?";
+  $("progressText").textContent = "Step " + (page+1) + " of " + PAGES;
+  $("progressBar").style.width = ((page)/PAGES*100) + "%";
+  for(var i=page*PAGE;i<(page+1)*PAGE;i++){
+    (function(i){
+      var fs = el("fieldset", {id:"fs"+i});
+      fs.appendChild(el("legend",{text:(i+1)+". "+ITEMS[i][1]}));
+      var opts = el("div",{"class":"opts"});
+      CHOICES.forEach(function(c,ci){
+        var id = "q"+i+"_"+ci;
+        var inp = el("input",{type:"radio",name:"q"+i,id:id,value:c[0]});
+        if(ans[i]===c[0]) inp.checked = true;
+        inp.addEventListener("change", function(){ ans[i]=c[0]; });
+        var lab = el("label",{"class":"opt","for":id},[inp, el("span",{text:c[1]})]);
+        opts.appendChild(lab);
+      });
+      fs.appendChild(opts); f.appendChild(fs);
+    })(i);
+  }
+  $("backBtn").hidden = (page===0);
+  $("nextBtn").textContent = (page===PAGES-1) ? "See my results" : "Next";
+}
+function validate(){
+  var missing = [];
+  for(var i=page*PAGE;i<(page+1)*PAGE;i++){ if(ans[i]===undefined) missing.push(i); }
+  if(missing.length){
+    $("err").className = "err warn";
+    $("err").textContent = "Please choose an answer for " + (missing.length===1 ? "statement " : "statements ") + missing.map(function(m){return m+1;}).join(", ") + " before you continue.";
+    var first = document.querySelector("#fs"+missing[0]+" input"); if(first) first.focus();
+    return false;
+  }
+  $("err").className = "err"; $("err").textContent = "";
+  return true;
+}
+function score(){
+  var s = {}; Object.keys(STYLES).forEach(function(k){s[k]=0;});
+  ITEMS.forEach(function(it,i){ s[it[0]] += parseInt(ans[i]||"0",10); });
+  return s;
+}
+function plural(n){ return n+" of 6"; }
+function renderResults(){
+  var s = score(); lastScores = s;
+  var keys = Object.keys(STYLES).sort(function(a,b){ return s[b]-s[a] || STYLES[a].name.localeCompare(STYLES[b].name); });
+  var thr = s[keys[1]];
+  var strong = keys.filter(function(k){ return s[k]>=thr && s[k]>0; });
+  var list = $("resList"); list.innerHTML = "";
+  var allZero = keys.every(function(k){return s[k]===0;});
+  $("resIntro").textContent = allZero
+    ? "You chose “I would rather not” for every activity. That is useful to know. Try the longer interest questionnaire below, or talk with your coach about what kinds of work you have enjoyed in the past."
+    : "Your answers matched these kinds of work most. Each score shows how many points you earned out of 6. Higher means a closer match. Many people match more than one style, and that is normal.";
+  keys.forEach(function(k){
+    var isStrong = strong.indexOf(k)>=0;
+    var card = el("div",{"class":"card"});
+    var h = el("h3",{style:"margin-top:0"});
+    h.appendChild(document.createTextNode(STYLES[k].name));
+    h.appendChild(el("span",{"class":"badge"+(isStrong?"":" alt"),text:(isStrong?"Strong match: ":"Score: ")+plural(s[k])}));
+    card.appendChild(h);
+    card.appendChild(el("p",{text:STYLES[k].desc}));
+    if(isStrong){
+      card.appendChild(el("p",{"class":"score",text:"Examples of jobs to explore:"}));
+      var ul = el("ul",{"class":"plain"});
+      STYLES[k].jobs.forEach(function(j){ ul.appendChild(el("li",{text:j})); });
+      card.appendChild(ul);
+    }
+    list.appendChild(card);
+  });
+  var nl = $("nextLinks"); nl.innerHTML = "";
+  var li1 = el("li");
+  if(OCCUPATION_EXPLORER_URL){
+    li1.appendChild(el("a",{href:OCCUPATION_EXPLORER_URL,target:"_blank",rel:"noopener",text:"California Occupation Explorer (opens in a new tab)"}));
+    li1.appendChild(document.createTextNode(": search for a job title or describe the work in your own words to see what the job involves and what it pays."));
+  } else {
+    li1.appendChild(document.createTextNode("California Occupation Explorer: ask your coach, instructor, or counselor for the link, then search for a job title or describe the work in your own words to see what the job involves and what it pays."));
+  }
+  nl.appendChild(li1);
+  var li2 = el("li");
+  li2.appendChild(el("a",{href:ONET_PROFILER_URL,target:"_blank",rel:"noopener",text:"O*NET Interest Profiler (opens in a new tab)"}));
+  li2.appendChild(document.createTextNode(": a longer career interest questionnaire from O*NET if you want more detail."));
+  nl.appendChild(li2);
+  var li3 = el("li",{text:"Your coach and your college’s career or counseling office can help you talk through what you find."});
+  nl.appendChild(li3);
+  show("results"); focusHead("resH");
+}
+function resultsText(){
+  var s = lastScores || score();
+  var keys = Object.keys(STYLES).sort(function(a,b){ return s[b]-s[a] || STYLES[a].name.localeCompare(STYLES[b].name); });
+  var thr = s[keys[1]];
+  var t = "WORK STYLES SORTER - MY RESULTS\n\n";
+  keys.forEach(function(k){
+    var strong = s[k]>=thr && s[k]>0;
+    t += STYLES[k].name + ": " + plural(s[k]) + (strong ? " (strong match)" : "") + "\n";
+    if(strong) t += "  Jobs to explore: " + STYLES[k].jobs.join("; ") + "\n";
+  });
+  t += "\nWhich results fit me, and which surprised me?\n" + ($("r1").value||"(not answered)") + "\n";
+  t += "\nWhich jobs I want to learn more about:\n" + ($("r2").value||"(not answered)") + "\n";
+  t += "\nOne thing I will do this month to learn more:\n" + ($("r3").value||"(not answered)") + "\n";
+  return t;
+}
+function fillPrint(){
+  var p = $("printReflect"); p.innerHTML = "";
+  [["Which results fit me, and which surprised me?","r1"],["Which jobs I want to learn more about:","r2"],["One thing I will do this month to learn more:","r3"]].forEach(function(q){
+    p.appendChild(el("p",{"class":"score",text:q[0]}));
+    p.appendChild(el("p",{text:$(q[1]).value||"(not answered)"}));
+  });
+}
+$("startBtn").addEventListener("click", function(){ page=0; show("quiz"); renderPage(); focusHead("stepH"); });
+$("backBtn").addEventListener("click", function(){ if(page>0){ page--; renderPage(); focusHead("stepH"); } });
+$("nextBtn").addEventListener("click", function(){
+  if(!validate()) return;
+  if(page<PAGES-1){ page++; renderPage(); focusHead("stepH"); } else { renderResults(); }
+});
+$("redoBtn").addEventListener("click", function(){ ans={}; page=0; ["r1","r2","r3"].forEach(function(i){$(i).value="";}); $("copyMsg").textContent=""; $("fallbackBox").hidden=true; show("intro"); focusHead("introH"); });
+$("printBtn").addEventListener("click", function(){ fillPrint(); window.print(); });
+window.addEventListener("beforeprint", fillPrint);
+$("copyBtn").addEventListener("click", function(){
+  var t = resultsText();
+  function fb(){ $("fallbackTa").value = t; $("fallbackBox").hidden = false; $("copyMsg").textContent = "Copying did not work in this browser. The text is shown below so you can copy it yourself."; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(function(){ $("fallbackBox").hidden=true; $("copyMsg").textContent="Your results were copied. You can paste them into a document or an email."; }, fb);
+  } else { fb(); }
+});
+})();
+</script>
+</body>
+</html>
