@@ -119,20 +119,7 @@ th{background:var(--forest);color:var(--ivory)}
     <p id="resIntro"></p>
     <div id="resList"></div>
     <h3>Think it over</h3>
-    <div class="noprint">
-      <div class="card">
-        <label class="lbl" for="r1">Which results fit you, and which surprised you?</label>
-        <textarea id="r1"></textarea>
-      </div>
-      <div class="card">
-        <label class="lbl" for="r2">Which jobs would you like to learn more about?</label>
-        <textarea id="r2"></textarea>
-      </div>
-      <div class="card">
-        <label class="lbl" for="r3">What is one thing you will do this month to learn more?</label>
-        <textarea id="r3"></textarea>
-      </div>
-    </div>
+    <div class="noprint" id="reflect"></div>
     <div class="card printonly" id="printReflect"></div>
     <h3>Where to look next</h3>
     <ul class="plain" id="nextLinks"></ul>
@@ -269,7 +256,71 @@ function renderResults(){
   nl.appendChild(li2);
   var li3 = el("li",{text:"Your coach and your college’s career or counseling office can help you talk through what you find."});
   nl.appendChild(li3);
+  renderReflect(strong);
   show("results"); focusHead("resH");
+}
+var NEXT_STEPS = [
+  "Look up one of these jobs in the California Occupation Explorer",
+  "Talk with someone who does this kind of work",
+  "Ask my counselor or advisor which programs lead to this work",
+  "Try the longer O*NET Interest Profiler"
+];
+var strongKeys = [];
+function checkRow(name, id, label, value){
+  var inp = el("input",{type:"checkbox",name:name,id:id,value:value||label});
+  return el("label",{"class":"opt","for":id},[inp, el("span",{text:label})]);
+}
+function renderReflect(strong){
+  strongKeys = strong;
+  var box = $("reflect"); box.innerHTML = "";
+  // Q1: fit
+  var fs1 = el("fieldset",{});
+  fs1.appendChild(el("legend",{text:"How well do these results fit you?"}));
+  var o1 = el("div",{"class":"opts"});
+  ["Fit me well","Fit me somewhat","Do not fit me"].forEach(function(t,i){
+    var inp = el("input",{type:"radio",name:"fit",id:"fit"+i,value:t});
+    o1.appendChild(el("label",{"class":"opt","for":"fit"+i},[inp, el("span",{text:t})]));
+  });
+  fs1.appendChild(o1);
+  fs1.appendChild(el("label",{"class":"lbl","for":"surprise",style:"margin-top:1rem",text:"Was anything surprising? (optional)"}));
+  fs1.appendChild(el("textarea",{id:"surprise",style:"min-height:4.5rem"}));
+  box.appendChild(fs1);
+  // Q2: jobs
+  var fs2 = el("fieldset",{id:"jobsFs"});
+  fs2.appendChild(el("legend",{text:"Which of these jobs sound interesting? Check any you would like to learn more about."}));
+  var seen = {}, o2 = el("div",{"class":"opts"}), n = 0;
+  strong.forEach(function(k){ STYLES[k].jobs.forEach(function(j){ if(!seen[j]){ seen[j]=1; o2.appendChild(checkRow("job","job"+(n++),j)); } }); });
+  o2.appendChild(checkRow("jobx","jobNone","None of these yet","none"));
+  o2.appendChild(checkRow("jobx","jobUnsure","I am not sure","unsure"));
+  fs2.appendChild(o2); box.appendChild(fs2);
+  // exclusive handling
+  fs2.addEventListener("change", function(e){
+    var t = e.target; if(t.type!=="checkbox") return;
+    var exclusive = (t.name==="jobx");
+    var all = fs2.querySelectorAll("input[type=checkbox]");
+    for(var i=0;i<all.length;i++){
+      if(all[i]===t) continue;
+      if(exclusive && t.checked) all[i].checked = false;
+      if(!exclusive && t.checked && all[i].name==="jobx") all[i].checked = false;
+    }
+  });
+  // Q3: next steps
+  var fs3 = el("fieldset",{});
+  fs3.appendChild(el("legend",{text:"What will you do next to learn more? Check any that you plan to do."}));
+  var o3 = el("div",{"class":"opts"});
+  NEXT_STEPS.forEach(function(t,i){ o3.appendChild(checkRow("next","next"+i,t)); });
+  fs3.appendChild(o3);
+  fs3.appendChild(el("label",{"class":"lbl","for":"nextOther",style:"margin-top:1rem",text:"Something else I will do (optional)"}));
+  fs3.appendChild(el("input",{type:"text",id:"nextOther"}));
+  box.appendChild(fs3);
+}
+function labelOf(inp){ var l = document.querySelector('label[for="'+inp.id+'"] span'); return l ? l.textContent : inp.value; }
+function getReflect(){
+  var fit = document.querySelector('input[name="fit"]:checked');
+  var jobs = [].slice.call(document.querySelectorAll('input[name="job"]:checked, input[name="jobx"]:checked')).map(labelOf);
+  var nexts = [].slice.call(document.querySelectorAll('input[name="next"]:checked')).map(labelOf);
+  var other = (($("nextOther")||{}).value||"").trim(); if(other) nexts.push(other);
+  return {fit: fit ? fit.value : "", surprise: (($("surprise")||{}).value||"").trim(), jobs: jobs, nexts: nexts};
 }
 function resultsText(){
   var s = lastScores || score();
@@ -281,17 +332,24 @@ function resultsText(){
     t += STYLES[k].name + ": " + plural(s[k]) + (strong ? " (strong match)" : "") + "\n";
     if(strong) t += "  Jobs to explore: " + STYLES[k].jobs.join("; ") + "\n";
   });
-  t += "\nWhich results fit me, and which surprised me?\n" + ($("r1").value||"(not answered)") + "\n";
-  t += "\nWhich jobs I want to learn more about:\n" + ($("r2").value||"(not answered)") + "\n";
-  t += "\nOne thing I will do this month to learn more:\n" + ($("r3").value||"(not answered)") + "\n";
+  var r = getReflect();
+  t += "\nHow well the results fit me: " + (r.fit||"(not answered)") + "\n";
+  if(r.surprise) t += "What surprised me: " + r.surprise + "\n";
+  t += "\nJobs I want to learn more about:\n" + (r.jobs.length ? r.jobs.map(function(j){return "- "+j;}).join("\n") : "(not answered)") + "\n";
+  t += "\nMy next steps:\n" + (r.nexts.length ? r.nexts.map(function(j){return "- "+j;}).join("\n") : "(not answered)") + "\n";
   return t;
 }
 function fillPrint(){
-  var p = $("printReflect"); p.innerHTML = "";
-  [["Which results fit me, and which surprised me?","r1"],["Which jobs I want to learn more about:","r2"],["One thing I will do this month to learn more:","r3"]].forEach(function(q){
-    p.appendChild(el("p",{"class":"score",text:q[0]}));
-    p.appendChild(el("p",{text:$(q[1]).value||"(not answered)"}));
-  });
+  var p = $("printReflect"); p.innerHTML = ""; var r = getReflect();
+  function block(title, lines){
+    p.appendChild(el("p",{"class":"score",text:title}));
+    if(!lines.length) lines = ["(not answered)"];
+    var ul = el("ul",{"class":"plain"}); lines.forEach(function(l){ ul.appendChild(el("li",{text:l})); }); p.appendChild(ul);
+  }
+  block("How well the results fit me:", r.fit ? [r.fit] : []);
+  if(r.surprise) block("What surprised me:", [r.surprise]);
+  block("Jobs I want to learn more about:", r.jobs);
+  block("My next steps:", r.nexts);
 }
 $("startBtn").addEventListener("click", function(){ page=0; show("quiz"); renderPage(); focusHead("stepH"); });
 $("backBtn").addEventListener("click", function(){ if(page>0){ page--; renderPage(); focusHead("stepH"); } });
@@ -299,7 +357,7 @@ $("nextBtn").addEventListener("click", function(){
   if(!validate()) return;
   if(page<PAGES-1){ page++; renderPage(); focusHead("stepH"); } else { renderResults(); }
 });
-$("redoBtn").addEventListener("click", function(){ ans={}; page=0; ["r1","r2","r3"].forEach(function(i){$(i).value="";}); $("copyMsg").textContent=""; $("fallbackBox").hidden=true; show("intro"); focusHead("introH"); });
+$("redoBtn").addEventListener("click", function(){ ans={}; page=0; $("reflect").innerHTML=""; $("copyMsg").textContent=""; $("fallbackBox").hidden=true; show("intro"); focusHead("introH"); });
 $("printBtn").addEventListener("click", function(){ fillPrint(); window.print(); });
 window.addEventListener("beforeprint", fillPrint);
 $("copyBtn").addEventListener("click", function(){
