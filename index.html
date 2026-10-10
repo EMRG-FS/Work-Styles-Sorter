@@ -62,6 +62,13 @@ table{border-collapse:collapse;width:100%;font-size:1rem}
 th,td{border:2px solid var(--warm);padding:.5rem .6rem;text-align:left;vertical-align:top;background:var(--white)}
 th{background:var(--forest);color:var(--ivory)}
 .printonly{display:none}
+.videobox{background:var(--white);border:2px solid var(--forest);border-radius:10px;padding:1rem 1.25rem;margin:0 0 1.25rem}
+.videobox h3{margin:0 0 .4rem}
+.videobox p{margin:0 0 .75rem}
+a.btn2{display:inline-flex;align-items:center;min-height:48px;border-radius:8px;padding:.6rem 1.25rem;font-weight:bold;text-decoration:none}
+a.btn2:hover{background:var(--sage-tint)}
+a.btn2:focus-visible{outline:3px solid var(--forest);outline-offset:3px;box-shadow:0 0 0 3px var(--ivory),0 0 0 6px var(--forest)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (max-width:520px){h1{font-size:1.6rem}.opts{flex-direction:column}.opt{width:100%}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media (forced-colors:active){.opt:has(input:checked){outline:3px solid Highlight}}
@@ -69,7 +76,7 @@ th{background:var(--forest);color:var(--ivory)}
   body{background:#fff;color:#000;font-size:12pt}
   header.band{background:#fff;color:#000;border-bottom:2px solid #000;padding:0 0 .5rem}
   .kicker{color:#000}
-  .noprint,.skip,.row,.progress,.bar{display:none!important}
+  .noprint,.skip,.row,.progress,.bar,.videobox{display:none!important}
   .card{border:1px solid #000;break-inside:avoid}
   th{background:#fff;color:#000}
   .printonly{display:block}
@@ -97,6 +104,11 @@ th{background:var(--forest);color:var(--ivory)}
     </div>
     <div class="note">
       <p><strong>This is a starting point, not a test.</strong> There are no right or wrong answers, and your results do not decide your future. Nothing you enter is saved or sent anywhere. You can copy or print your results at the end.</p>
+    </div>
+    <div class="videobox" id="videoBox">
+      <h3 id="videoH">New to this tool? Watch the how-to video.</h3>
+      <p>A short video shows you what the Work Styles Sorter does and walks you through each step. You can watch it first, or keep it open in another tab while you work.</p>
+      <a class="btn2" id="videoLink" href="https://www.freshstart-online.com/en/video-details/works-styles-sort-tool-explainer-video/28725/" target="_blank" rel="noopener">Open the how-to video<span class="sr-only"> (opens in a new tab)</span></a>
     </div>
     <div class="row"><button type="button" class="btn" id="startBtn">Start the activity</button></div>
   </section>
